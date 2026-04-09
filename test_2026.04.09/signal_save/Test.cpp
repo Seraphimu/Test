@@ -203,3 +203,6 @@ void sigInit() {
 		sigArr.push_back(i);
 	}
 }
+
+  // //不知道它是具体做什么的，但我知道它是signal()++
+  // sigaction(2, &act, &oact);
