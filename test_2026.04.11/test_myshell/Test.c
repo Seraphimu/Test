@@ -15,11 +15,13 @@
 
 #define MAX 1024
 #define OPT_NUM 64
-// 重定向类型枚举
-#define NONE_REDIR   0
-#define INPUT_REDIR  1
-#define OUTPUT_REDIR 2
-#define APPEND_REDIR  3
+
+enum REDIR {
+    NONE,
+    INPUT,
+    OUTPUT,
+    APPEND
+};
 
 #define DEBUG
 
@@ -39,7 +41,7 @@ char lineCommand[MAX];
 //存储选项指针
 char * myArgv[OPT_NUM];
 //重定向类型, 默认没有重定向
-int redirType = NONE_REDIR;
+enum REDIR redirType = NONE;
 //重定向文件名
 char * redirFile = NULL;
 
@@ -59,7 +61,7 @@ int main() {
 
 void shell() {
     while (1) {
-        redirType = NONE_REDIR;
+        redirType = NONE;
         redirFile = NULL;
         printf("%s@ %s %s#", getenv("USER"), "Xen", getenv("PWD"));
         fflush(stdout);
@@ -126,9 +128,9 @@ void shell() {
 
             //处理文件重定向
             switch (redirType) {
-                case NONE_REDIR:
+                case NONE:
                     break;
-                case INPUT_REDIR:
+                case INPUT:
                 {
                     //打开文件, 并重定向到stdin
                     int fd = open(redirFile, O_RDONLY);
@@ -138,12 +140,12 @@ void shell() {
                     dup2(fd, 0);
                     break;
                 }
-                case OUTPUT_REDIR:
-                case APPEND_REDIR:
+                case OUTPUT:
+                case APPEND:
                 {
                     umask(0);
                     int flags = O_WRONLY | O_CREAT;
-                    if (redirType == APPEND_REDIR)
+                    if (redirType == APPEND)
                         flags |= O_APPEND;
                     else
                         flags |= O_TRUNC;
@@ -192,11 +194,11 @@ void commandCheck(char * command) {
             start++;
             if (*start == '>') {
                 //追加重定向
-                redirType = APPEND_REDIR;
+                redirType = APPEND;
                 start++;
             }
             else {
-                redirType = OUTPUT_REDIR;
+                redirType = OUTPUT;
             }
             //跳过重定向文件前的空格
             trimSpace(start);
@@ -210,7 +212,7 @@ void commandCheck(char * command) {
             *start = '\0';
             start++;
             trimSpace(start);
-            redirType = INPUT_REDIR;
+            redirType = INPUT;
             redirFile = start;
             break;
         }

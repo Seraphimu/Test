@@ -1,0 +1,5 @@
+bugs
+a.out
+makefile
+Test.c
+test.txt
